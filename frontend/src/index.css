@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Subtle selection for dark UI */
+::selection {
+  /* background: rgb(63 63 70); */
+  background: #112E81;
+}
+

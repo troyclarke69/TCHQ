@@ -1,0 +1,20 @@
+[[services]]
+  internal_port = 8000
+  protocol = "tcp"
+
+  [[services.ports]]
+    handlers = ["http"]
+    port = 80
+
+  [[services.ports]]
+    handlers = ["tls", "http"]
+    port = 443
+
+  # Add or update this section:
+  [[services.http_checks]]
+    interval = "10s"      # How often to check the app
+    grace_period = "5s"   # Time given to your API to boot up on startup
+    method = "get"
+    path = "/health"      # Pings your FastAPI endpoint
+    protocol = "http"
+    timeout = "2s"
