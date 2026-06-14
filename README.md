@@ -102,7 +102,7 @@ Compose sets defaults for local dev. If you want to override, copy `.env.example
 
 # QUERY DOCKER DB
 Querying Postgres in Docker
-Your Compose DB service is db, database tchq, user/password postgres / postgres.
+Your Compose DB service is db, database tchq, user/password postgres / ********.
 
   ## Option 1 — psql inside the container (simplest)
 
