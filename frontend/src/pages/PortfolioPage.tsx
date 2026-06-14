@@ -17,6 +17,9 @@ export default function PortfolioPage() {
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
 
+  const baseUrl = import.meta.env.VITE_API_PROXY_TARGET || "";
+  // console.log("API base URL:", baseUrl);
+
   const featured = useMemo(
     () => (data?.projects ?? []).filter((p) => p.featured),
     [data],
@@ -27,8 +30,8 @@ export default function PortfolioPage() {
     (async () => {
       try {
         const [projects, testimonials] = await Promise.all([
-          apiGetJson<Project[]>("/api/projects"),
-          apiGetJson<Testimonial[]>("/api/testimonials"),
+          apiGetJson<Project[]>(`${baseUrl}/api/projects`),
+          apiGetJson<Testimonial[]>(`${baseUrl}/api/testimonials`),
         ]);
         if (!cancelled) setData({ projects, testimonials });
       } catch (e) {
@@ -53,7 +56,7 @@ export default function PortfolioPage() {
         email: String(form.get("email") ?? "").trim(),
         message: String(form.get("message") ?? "").trim(),
       };
-      await apiPostJson<ContactOut>("/api/contact", payload);
+      await apiPostJson<ContactOut>(`${baseUrl}/api/contact`, payload);
       formEl.reset();
       setSent(true);
     } catch (err) {

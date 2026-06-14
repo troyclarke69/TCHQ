@@ -26,8 +26,8 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_access_token_minutes: int = 60 * 24 * 7
 
-    admin_email: str = "admin@example.com"
-    admin_password: str = "admin"
+    admin_email: str = ""
+    admin_password: str = ""
 
 
 settings = Settings()

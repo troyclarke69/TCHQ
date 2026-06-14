@@ -20,13 +20,16 @@ export default function AdminPage() {
   const [error, setError] = useState<string | null>(null);
   const [loginLoading, setLoginLoading] = useState(false);
 
+  const baseUrl = import.meta.env.VITE_API_PROXY_TARGET || "";
+  // console.log("API base URL:", baseUrl);
+
   const loadData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const [p, t] = await Promise.all([
-        apiGetJson<Project[]>("/api/projects"),
-        apiGetJson<Testimonial[]>("/api/testimonials"),
+        apiGetJson<Project[]>(`${baseUrl}/api/projects`),
+        apiGetJson<Testimonial[]>(`${baseUrl}/api/testimonials`),
       ]);
       setProjects(p);
       setTestimonials(t);
@@ -58,7 +61,7 @@ export default function AdminPage() {
     setError(null);
     try {
       const form = new FormData(e.currentTarget);
-      const res = await apiPostJson<TokenResponse>("/api/admin/login", {
+      const res = await apiPostJson<TokenResponse>(`${baseUrl}/api/admin/login`, {
         email: String(form.get("email") ?? ""),
         password: String(form.get("password") ?? ""),
       });
@@ -87,7 +90,7 @@ export default function AdminPage() {
     const hrefRaw = String(form.get("href") ?? "").trim();
     try {
       const created = await apiPostJson<Project>(
-        "/api/admin/projects",
+        `${baseUrl}/api/admin/projects`,
         {
           title: String(form.get("title") ?? ""),
           summary: String(form.get("summary") ?? ""),
@@ -110,7 +113,7 @@ export default function AdminPage() {
     if (!token || !confirm("Delete this project?")) return;
     setError(null);
     try {
-      await apiDelete(`/api/admin/projects/${id}`, token);
+      await apiDelete(`${baseUrl}/api/admin/projects/${id}`, token);
       setProjects((prev) => prev.filter((p) => p.id !== id));
     } catch (err) {
       if (!handleUnauthorized(err)) {
@@ -128,7 +131,7 @@ export default function AdminPage() {
     const company = String(form.get("company") ?? "").trim();
     try {
       const created = await apiPostJson<Testimonial>(
-        "/api/admin/testimonials",
+        `${baseUrl}/api/admin/testimonials`,
         {
           name: String(form.get("name") ?? ""),
           role: role || null,
@@ -150,7 +153,7 @@ export default function AdminPage() {
     if (!token || !confirm("Delete this testimonial?")) return;
     setError(null);
     try {
-      await apiDelete(`/api/admin/testimonials/${id}`, token);
+      await apiDelete(`${baseUrl}/api/admin/testimonials/${id}`, token);
       setTestimonials((prev) => prev.filter((t) => t.id !== id));
     } catch (err) {
       if (!handleUnauthorized(err)) {
@@ -201,14 +204,14 @@ export default function AdminPage() {
                   label="Email"
                   name="email"
                   type="email"
-                  autoComplete="username"
+                  autoComplete=""
                   required
                 />
                 <Input
                   label="Password"
                   name="password"
                   type="password"
-                  autoComplete="current-password"
+                  autoComplete=""
                   required
                 />
                 <button
