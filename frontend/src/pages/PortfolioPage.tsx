@@ -126,7 +126,7 @@ export default function PortfolioPage() {
               >
                 <div className="grid gap-4">
                   <Input
-                    // label="Name"
+                    label=""                   
                     name="name"
                     placeholder="name"
                     minLength={2}
@@ -134,7 +134,7 @@ export default function PortfolioPage() {
                     required
                   />
                   <Input
-                    // label="Email"
+                    label=""                   
                     name="email"
                     placeholder="email"
                     type="email"
@@ -142,7 +142,7 @@ export default function PortfolioPage() {
                   />
                   <div className="grid gap-2">
                     <Textarea
-                      // label="Message"
+                      label=""
                       name="message"
                       placeholder="What do you have in mind?"
                       minLength={10}
