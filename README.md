@@ -146,6 +146,7 @@ Your contact rows should be in contact_messages with columns id, name, email, me
 
 # FLY NOTES
 
+cd backend
 fly launch --no-deploy
 fly secrets set DATABASE_URL="postgresql://user:pass@host:5432/db" 
 ANOTHER_SECRET="value"
