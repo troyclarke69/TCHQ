@@ -1,0 +1,1 @@
+Ability to use AI-assisted coding tools (e.g. Claude Code, GitHub Copilot) to accelerate development while exercising strong judgment around code quality, testing, and security

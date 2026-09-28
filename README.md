@@ -12,7 +12,7 @@ Minimal, sleek portfolio website with:
 Began: 06-02-2026 (Cursor)
 
 * ********************************************************************* *
-
+* ********************************************************************* *
 # Run Project - FULL (Docker)
 
 * cd C:\Users\tclar\TCHQ
@@ -25,9 +25,10 @@ Began: 06-02-2026 (Cursor)
   Frontend (frontend) — waits on backend, port 5173  (* Docker or Netlify)
 
 * ********************************************************************* *
+* ********************************************************************* *
+
 
 ## Local development (Docker Compose)
-
   ## Use this when you want hot reload without rebuilding images. 
 
 1. Database only
@@ -148,9 +149,16 @@ Your contact rows should be in contact_messages with columns id, name, email, me
 
 cd backend
 fly launch --no-deploy
+
+* VERY IMPORTANT!!
 fly secrets set DATABASE_URL="postgresql://user:pass@host:5432/db" 
-ANOTHER_SECRET="value"
+            set CORS_ORIGINS="http://localhost:5173,https://troyclarke2026.netlify.app"
+
+            set ADMIN_EMAIL= <not set -but could be, default from not sure where?>
+            set ADMIN_PASSWORD= <not set -but could be, default from not sure where?>
+
 fly deploy
+fly logs 
 
 * ********************************************************************* *
 

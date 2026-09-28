@@ -1,9 +1,12 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { apiDelete, apiGetJson, apiPostJson } from "../api";
 import { clearAdminToken, getAdminToken, setAdminToken } from "../auth";
 import { Checkbox, Input, Textarea } from "../components/FormFields";
+import ThemeSwitcher from "../components/ThemeSwitcher";
 import type { Project, Testimonial, TokenResponse } from "../types";
+
+const CATEGORY_SUGGESTIONS = ["Data", "Full stack", ".NET", "Frontend", "Backend", "Cloud", "DevOps"];
 
 function parseTech(value: string): string[] {
   return value
@@ -22,6 +25,11 @@ export default function AdminPage() {
 
   const baseUrl = import.meta.env.VITE_API_PROXY_TARGET || "";
   // console.log("API base URL:", baseUrl);
+
+  const categorySuggestions = useMemo(() => {
+    const fromData = projects.map((p) => p.category).filter((c): c is string => Boolean(c));
+    return Array.from(new Set([...CATEGORY_SUGGESTIONS, ...fromData]));
+  }, [projects]);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -88,6 +96,9 @@ export default function AdminPage() {
     setError(null);
     const form = new FormData(e.currentTarget);
     const hrefRaw = String(form.get("href") ?? "").trim();
+    const githubRaw = String(form.get("github") ?? "").trim();
+    const categoryRaw = String(form.get("category") ?? "").trim();
+    const thumbnailRaw = String(form.get("thumbnail") ?? "").trim();
     try {
       const created = await apiPostJson<Project>(
         `${baseUrl}/api/admin/projects`,
@@ -96,6 +107,9 @@ export default function AdminPage() {
           summary: String(form.get("summary") ?? ""),
           tech: parseTech(String(form.get("tech") ?? "")),
           href: hrefRaw || null,
+          github: githubRaw || null,
+          category: categoryRaw || null,
+          thumbnail: thumbnailRaw || null,
           featured: form.get("featured") === "on",
         },
         token,
@@ -163,22 +177,23 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-dvh">
+    <div className="min-h-dvh bg-gradient-to-b from-[var(--bg-from)] via-[var(--bg-via)] to-[var(--bg-to)] text-[var(--text-primary)] transition-colors duration-500">
       <div className="mx-auto max-w-5xl px-6 py-10">
         <header className="flex items-center justify-between gap-4">
           <div>
             <h1 className="text-xl font-semibold">Admin</h1>
-            <p className="mt-1 text-sm text-zinc-400">Manage portfolio content</p>
+            <p className="mt-1 text-sm text-[var(--text-muted)]">Manage portfolio content</p>
           </div>
           <div className="flex items-center gap-3 text-sm">
-            <Link className="text-zinc-300 hover:text-zinc-50" to="/">
+            <ThemeSwitcher />
+            <Link className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]" to="/">
               ← Portfolio
             </Link>
             {token ? (
               <button
                 type="button"
                 onClick={logout}
-                className="rounded-xl border border-white/15 px-3 py-1.5 text-zinc-50 transition hover:bg-white/5"
+                className="rounded-xl border border-[var(--border)] px-3 py-1.5 text-[var(--text-primary)] transition hover:bg-[var(--surface)]"
               >
                 Sign out
               </button>
@@ -187,16 +202,16 @@ export default function AdminPage() {
         </header>
 
         {error ? (
-          <div className="mt-6 rounded-2xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-200">
+          <div className="mt-6 rounded-2xl border border-[var(--danger-border)] bg-[var(--danger-bg)] p-4 text-sm text-[var(--danger-text)]">
             {error}
           </div>
         ) : null}
 
         {!token ? (
           <section className="mx-auto mt-10 max-w-md">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
               <h2 className="text-base font-medium">Sign in</h2>
-              <p className="mt-1 text-sm text-zinc-400">
+              <p className="mt-1 text-sm text-[var(--text-muted)]">
                 Enter admin credentials
               </p>
               <form className="mt-6 grid gap-4" onSubmit={onLogin}>
@@ -217,7 +232,7 @@ export default function AdminPage() {
                 <button
                   type="submit"
                   disabled={loginLoading}
-                  className="inline-flex items-center justify-center rounded-xl bg-zinc-50 px-4 py-2 text-sm font-medium text-zinc-950 transition hover:bg-white disabled:opacity-60"
+                  className="inline-flex items-center justify-center rounded-xl bg-[var(--accent)] px-4 py-2 text-sm font-medium text-[var(--accent-text)] transition disabled:opacity-60"
                 >
                   {loginLoading ? "Signing in…" : "Sign in"}
                 </button>
@@ -227,15 +242,15 @@ export default function AdminPage() {
         ) : (
           <div className="mt-10 space-y-12">
             {loading ? (
-              <p className="text-sm text-zinc-400">Loading…</p>
+              <p className="text-sm text-[var(--text-muted)]">Loading…</p>
             ) : null}
 
             <section>
               <h2 className="text-lg font-semibold">Projects</h2>
-              <p className="mt-1 text-sm text-zinc-400">Add or remove portfolio projects.</p>
+              <p className="mt-1 text-sm text-[var(--text-muted)]">Add or remove portfolio projects.</p>
 
               <form
-                className="mt-5 grid gap-4 rounded-2xl border border-white/10 bg-white/5 p-5 md:grid-cols-2"
+                className="mt-5 grid gap-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 md:grid-cols-2"
                 onSubmit={onCreateProject}
               >
                 <Input label="Title" name="title" required minLength={2} maxLength={120} />
@@ -250,11 +265,35 @@ export default function AdminPage() {
                     placeholder="React, TypeScript, FastAPI"
                   />
                 </div>
+                <Input
+                  label="Category (optional)"
+                  name="category"
+                  list="category-suggestions"
+                  placeholder="Full stack"
+                  maxLength={60}
+                />
+                <datalist id="category-suggestions">
+                  {categorySuggestions.map((c) => (
+                    <option key={c} value={c} />
+                  ))}
+                </datalist>
+                <Input
+                  label="GitHub URL (optional)"
+                  name="github"
+                  type="url"
+                  placeholder="https://github.com/…"
+                />
+                <Input
+                  label="Thumbnail URL (optional)"
+                  name="thumbnail"
+                  type="url"
+                  placeholder="https://…/image.png"
+                />
                 <Checkbox label="Featured on homepage" name="featured" />
                 <div className="flex items-end md:justify-end">
                   <button
                     type="submit"
-                    className="inline-flex items-center justify-center rounded-xl bg-zinc-50 px-4 py-2 text-sm font-medium text-zinc-950 transition hover:bg-white"
+                    className="inline-flex items-center justify-center rounded-xl bg-[var(--accent)] px-4 py-2 text-sm font-medium text-[var(--accent-text)] transition"
                   >
                     Add project
                   </button>
@@ -263,31 +302,48 @@ export default function AdminPage() {
 
               <ul className="mt-6 space-y-3">
                 {projects.length === 0 ? (
-                  <li className="text-sm text-zinc-400">No projects yet.</li>
+                  <li className="text-sm text-[var(--text-muted)]">No projects yet.</li>
                 ) : (
                   projects.map((p) => (
                     <li
                       key={p.id}
-                      className="flex items-start justify-between gap-4 rounded-2xl border border-white/10 bg-white/5 p-4"
+                      className="flex items-start justify-between gap-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4"
                     >
                       <div>
                         <div className="font-medium">
                           {p.title}
+                          {p.category ? (
+                            <span className="ml-2 rounded-full bg-[var(--badge-bg)] px-2 py-0.5 text-xs text-[var(--badge-text)]">
+                              {p.category}
+                            </span>
+                          ) : null}
                           {p.featured ? (
-                            <span className="ml-2 rounded-full border border-white/10 px-2 py-0.5 text-xs text-zinc-400">
+                            <span className="ml-2 rounded-full border border-[var(--border)] px-2 py-0.5 text-xs text-[var(--text-muted)]">
                               featured
                             </span>
                           ) : null}
                         </div>
-                        <div className="mt-1 text-sm text-zinc-300">{p.summary}</div>
+                        <div className="mt-1 text-sm text-[var(--text-secondary)]">{p.summary}</div>
                         {p.tech.length > 0 ? (
-                          <div className="mt-2 text-xs text-zinc-500">{p.tech.join(" · ")}</div>
+                          <div className="mt-2 text-xs text-[var(--text-muted)]">{p.tech.join(" · ")}</div>
+                        ) : null}
+                        {p.github ? (
+                          <div className="mt-1 text-xs text-[var(--text-muted)]">
+                            <a
+                              href={p.github}
+                              className="underline decoration-[var(--border)] underline-offset-2 hover:text-[var(--text-primary)]"
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              {p.github}
+                            </a>
+                          </div>
                         ) : null}
                       </div>
                       <button
                         type="button"
                         onClick={() => void onDeleteProject(p.id)}
-                        className="shrink-0 rounded-xl border border-rose-500/30 px-3 py-1 text-xs text-rose-200 transition hover:bg-rose-500/10"
+                        className="shrink-0 rounded-xl border border-[var(--danger-border)] px-3 py-1 text-xs text-[var(--danger-text)] transition hover:bg-[var(--danger-bg)]"
                       >
                         Delete
                       </button>
@@ -299,10 +355,10 @@ export default function AdminPage() {
 
             <section>
               <h2 className="text-lg font-semibold">Testimonials</h2>
-              <p className="mt-1 text-sm text-zinc-400">Add or remove client quotes.</p>
+              <p className="mt-1 text-sm text-[var(--text-muted)]">Add or remove client quotes.</p>
 
               <form
-                className="mt-5 grid gap-4 rounded-2xl border border-white/10 bg-white/5 p-5 md:grid-cols-2"
+                className="mt-5 grid gap-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 md:grid-cols-2"
                 onSubmit={onCreateTestimonial}
               >
                 <Input label="Name" name="name" required minLength={2} maxLength={120} />
@@ -314,7 +370,7 @@ export default function AdminPage() {
                 <div className="md:col-span-2 flex justify-end">
                   <button
                     type="submit"
-                    className="inline-flex items-center justify-center rounded-xl bg-zinc-50 px-4 py-2 text-sm font-medium text-zinc-950 transition hover:bg-white"
+                    className="inline-flex items-center justify-center rounded-xl bg-[var(--accent)] px-4 py-2 text-sm font-medium text-[var(--accent-text)] transition"
                   >
                     Add testimonial
                   </button>
@@ -323,24 +379,24 @@ export default function AdminPage() {
 
               <ul className="mt-6 space-y-3">
                 {testimonials.length === 0 ? (
-                  <li className="text-sm text-zinc-400">No testimonials yet.</li>
+                  <li className="text-sm text-[var(--text-muted)]">No testimonials yet.</li>
                 ) : (
                   testimonials.map((t) => (
                     <li
                       key={t.id}
-                      className="flex items-start justify-between gap-4 rounded-2xl border border-white/10 bg-white/5 p-4"
+                      className="flex items-start justify-between gap-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4"
                     >
                       <div>
                         <div className="font-medium">{t.name}</div>
-                        <div className="text-sm text-zinc-400">
+                        <div className="text-sm text-[var(--text-muted)]">
                           {[t.role, t.company].filter(Boolean).join(" · ") || "—"}
                         </div>
-                        <blockquote className="mt-2 text-sm text-zinc-300">{t.quote}</blockquote>
+                        <blockquote className="mt-2 text-sm text-[var(--text-secondary)]">{t.quote}</blockquote>
                       </div>
                       <button
                         type="button"
                         onClick={() => void onDeleteTestimonial(t.id)}
-                        className="shrink-0 rounded-xl border border-rose-500/30 px-3 py-1 text-xs text-rose-200 transition hover:bg-rose-500/10"
+                        className="shrink-0 rounded-xl border border-[var(--danger-border)] px-3 py-1 text-xs text-[var(--danger-text)] transition hover:bg-[var(--danger-bg)]"
                       >
                         Delete
                       </button>

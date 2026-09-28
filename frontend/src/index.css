@@ -2,9 +2,129 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Subtle selection for dark UI */
-::selection {
-  /* background: rgb(63 63 70); */
-  background: #112E81;
+/*
+  Theming: each theme sets the same set of CSS custom properties, consumed
+  throughout the app via Tailwind arbitrary values, e.g. bg-[var(--surface)].
+  The `data-theme` attribute on <html> is set by theme.tsx (and, before
+  React mounts, by an inline bootstrap script in index.html to avoid a
+  flash of the wrong theme).
+*/
+
+:root,
+[data-theme="dark"] {
+  --bg-from: #3f3f46;
+  --bg-via: #020617;
+  --bg-to: #71717a;
+
+  --surface: rgba(255, 255, 255, 0.06);
+  --surface-strong: rgba(255, 255, 255, 0.12);
+  --border: rgba(255, 255, 255, 0.1);
+
+  --text-primary: #fafafa;
+  --text-secondary: #d4d4d8;
+  --text-muted: #a1a1aa;
+
+  --heading: #60a5fa;
+  --heading-soft: #bfdbfe;
+
+  --accent: #fafafa;
+  --accent-text: #09090b;
+
+  --badge-bg: rgba(9, 9, 11, 0.25);
+  --badge-text: #fde68a;
+
+  --nav-text: #bbf7d0;
+  --nav-hover: #fafafa;
+
+  --danger-bg: rgba(244, 63, 94, 0.1);
+  --danger-border: rgba(244, 63, 94, 0.2);
+  --danger-text: #fda4af;
+
+  --selection-bg: #112e81;
+
+  --logo-from: #14532d;
+  --logo-via: #1e3a8a;
+  --logo-to: #4ade80;
 }
 
+[data-theme="light"] {
+  --bg-from: #f8fafc;
+  --bg-via: #eef2ff;
+  --bg-to: #e2e8f0;
+
+  --surface: rgba(15, 23, 42, 0.04);
+  --surface-strong: rgba(15, 23, 42, 0.08);
+  --border: rgba(15, 23, 42, 0.12);
+
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+
+  --heading: #2563eb;
+  --heading-soft: #1d4ed8;
+
+  --accent: #0f172a;
+  --accent-text: #f8fafc;
+
+  --badge-bg: rgba(15, 23, 42, 0.06);
+  --badge-text: #92400e;
+
+  --nav-text: #15803d;
+  --nav-hover: #0f172a;
+
+  --danger-bg: rgba(225, 29, 72, 0.08);
+  --danger-border: rgba(225, 29, 72, 0.25);
+  --danger-text: #be123c;
+
+  --selection-bg: #bfdbfe;
+
+  --logo-from: #86efac;
+  --logo-via: #60a5fa;
+  --logo-to: #14532d;
+}
+
+[data-theme="monet"] {
+  --bg-from: #ecdcf0;
+  --bg-via: #d3ecdf;
+  --bg-to: #f8e6d2;
+
+  --surface: rgba(255, 255, 255, 0.45);
+  --surface-strong: rgba(255, 255, 255, 0.68);
+  --border: rgba(76, 29, 97, 0.14);
+
+  --text-primary: #3b2554;
+  --text-secondary: #5b4470;
+  --text-muted: #857591;
+
+  --heading: #7c3aed;
+  --heading-soft: #9d8fd6;
+
+  --accent: #4c1d6b;
+  --accent-text: #fdf4ff;
+
+  --badge-bg: rgba(124, 58, 237, 0.12);
+  --badge-text: #6d28d9;
+
+  --nav-text: #a45c8c;
+  --nav-hover: #3b2554;
+
+  --danger-bg: rgba(225, 29, 72, 0.1);
+  --danger-border: rgba(225, 29, 72, 0.25);
+  --danger-text: #9f1239;
+
+  --selection-bg: #f5c6d6;
+
+  --logo-from: #f7c6d9;
+  --logo-via: #b8b3ea;
+  --logo-to: #a8ddd0;
+}
+
+::selection {
+  background: var(--selection-bg);
+}
+
+body {
+  transition:
+    background-color 0.5s ease,
+    color 0.5s ease;
+}

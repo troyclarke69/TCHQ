@@ -24,6 +24,9 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def _startup() -> None:
+    if not settings.run_startup_init:
+        return
+
     async with engine.begin() as conn:
         await conn.run_sync(models.Base.metadata.create_all)
 
@@ -38,6 +41,9 @@ async def _startup() -> None:
                         summary="Reduced time-to-value with a streamlined flow and telemetry.",
                         tech=["React", "TypeScript", "Tailwind", "FastAPI", "Postgres"],
                         href=None,
+                        github=None,
+                        category="Full stack",
+                        thumbnail=None,
                         featured=True,
                     ),
                     models.Project(
@@ -45,6 +51,9 @@ async def _startup() -> None:
                         summary="Unified admin workflows and improved data integrity across services.",
                         tech=["FastAPI", "Postgres", "SQLAlchemy", "Docker"],
                         href=None,
+                        github=None,
+                        category="Data",
+                        thumbnail=None,
                         featured=True,
                     ),
                 ]
@@ -87,6 +96,9 @@ async def list_projects(session: AsyncSession = Depends(get_session)) -> list[sc
             summary=r.summary,
             tech=r.tech,
             href=r.href,
+            github=r.github,
+            category=r.category,
+            thumbnail=r.thumbnail,
             featured=r.featured,
         )
         for r in rows
@@ -133,7 +145,17 @@ async def admin_create_project(
     session.add(p)
     await session.commit()
     await session.refresh(p)
-    return schemas.ProjectOut(id=p.id, title=p.title, summary=p.summary, tech=p.tech, href=p.href, featured=p.featured)
+    return schemas.ProjectOut(
+        id=p.id,
+        title=p.title,
+        summary=p.summary,
+        tech=p.tech,
+        href=p.href,
+        github=p.github,
+        category=p.category,
+        thumbnail=p.thumbnail,
+        featured=p.featured,
+    )
 
 
 @app.delete("/api/admin/projects/{project_id}", dependencies=[Depends(require_admin)], status_code=204)

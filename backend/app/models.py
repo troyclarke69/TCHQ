@@ -18,6 +18,9 @@ class Project(Base):
     summary: Mapped[str] = mapped_column(String(280), nullable=False)
     tech: Mapped[list[str]] = mapped_column(ARRAY(String(40)), nullable=False, default=list)
     href: Mapped[str | None] = mapped_column(String(300), nullable=True)
+    github: Mapped[str | None] = mapped_column(String(300), nullable=True)
+    category: Mapped[str | None] = mapped_column(String(60), nullable=True)
+    thumbnail: Mapped[str | None] = mapped_column(String(500), nullable=True)
     featured: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(

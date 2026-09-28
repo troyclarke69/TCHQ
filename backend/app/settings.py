@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     )
 
     app_name: str = "TCHQ API"
-    cors_origins: str = "http://localhost:5173"
+    cors_origins: str = "http://localhost:5173,https://troyclarke2026.netlify.app"
 
     database_url: str = "postgresql+asyncpg://postgres:postgres@db:5432/tchq"
 
@@ -28,6 +28,12 @@ class Settings(BaseSettings):
 
     admin_email: str = ""
     admin_password: str = ""
+
+    # When False, skips the schema-introspection + seed-check DB round trips
+    # on process startup. Safe to disable once the schema is stable in
+    # production (set RUN_STARTUP_INIT=false as a Fly secret) to shave a
+    # couple of DB round-trips off every cold start.
+    run_startup_init: bool = True
 
 
 settings = Settings()

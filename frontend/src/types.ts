@@ -4,6 +4,9 @@ export type Project = {
   summary: string;
   tech: string[];
   href?: string | null;
+  github?: string | null;
+  category?: string | null;
+  thumbnail?: string | null;
   featured: boolean;
 };
 

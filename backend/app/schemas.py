@@ -10,6 +10,9 @@ class ProjectOut(BaseModel):
     summary: str
     tech: list[str]
     href: str | None
+    github: str | None
+    category: str | None
+    thumbnail: str | None
     featured: bool
 
 
@@ -18,6 +21,9 @@ class ProjectIn(BaseModel):
     summary: str = Field(min_length=5, max_length=280)
     tech: list[str] = Field(default_factory=list)
     href: str | None = Field(default=None, max_length=300)
+    github: str | None = Field(default=None, max_length=300)
+    category: str | None = Field(default=None, max_length=60)
+    thumbnail: str | None = Field(default=None, max_length=500)
     featured: bool = False
 
 
