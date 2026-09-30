@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 225">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0e7490"/>
+      <stop offset="0.55" stop-color="#155e75"/>
+      <stop offset="1" stop-color="#4c1d95"/>
+    </linearGradient>
+    <filter id="ds" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#0f172a" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <rect width="400" height="225" fill="url(#bg)"/>
+  <circle cx="60" cy="190" r="70" fill="#ffffff" opacity="0.07"/>
+  <circle cx="360" cy="30" r="90" fill="#0f172a" opacity="0.10"/>
+  <circle cx="330" cy="180" r="50" fill="#ffffff" opacity="0.06"/>
+
+  <g filter="url(#ds)">
+
+    <!-- claim document -->
+    <g fill="none" stroke="#ffffff" stroke-opacity="0.7" stroke-width="7" stroke-linejoin="round" stroke-linecap="round">
+      <rect x="145" y="55" width="85" height="110" rx="6"/>
+      <line x1="157" y1="78" x2="205" y2="78" stroke-width="5" opacity="0.7"/>
+      <line x1="157" y1="94" x2="205" y2="94" stroke-width="5" opacity="0.7"/>
+      <line x1="157" y1="110" x2="205" y2="110" stroke-width="5" opacity="0.7"/>
+      <line x1="157" y1="126" x2="190" y2="126" stroke-width="5" opacity="0.7"/>
+    </g>
+    <!-- magnifying lens stamped over the claim -->
+    <circle cx="222" cy="95" r="28" fill="none" stroke="#ffffff" stroke-opacity="0.97" stroke-width="14"/>
+    <line x1="242" y1="115" x2="270" y2="143" stroke="#ffffff" stroke-opacity="0.97" stroke-width="14" stroke-linecap="round"/>
+    
+  </g>
+</svg>

@@ -84,9 +84,9 @@
 }
 
 [data-theme="monet"] {
-  --bg-from: #ecdcf0;
-  --bg-via: #d3ecdf;
-  --bg-to: #f8e6d2;
+  --bg-from: #ddc2e8;
+  --bg-via: #b3ddd0;
+  --bg-to: #eed3a8;
 
   --surface: rgba(255, 255, 255, 0.45);
   --surface-strong: rgba(255, 255, 255, 0.68);
@@ -119,12 +119,141 @@
   --logo-to: #a8ddd0;
 }
 
+[data-theme="funky"] {
+  /* Intentionally loud and a little clashing -- that's the point of this one. */
+  --bg-from: #ff0080;
+  --bg-via: #00e5ff;
+  --bg-to: #ffea00;
+
+  --surface: rgba(10, 10, 15, 0.7);
+  --surface-strong: rgba(10, 10, 15, 0.85);
+  --border: rgba(255, 255, 255, 0.18);
+
+  --text-primary: #fdfdfd;
+  --text-secondary: #e8e8e8;
+  --text-muted: #b3b3b3;
+
+  --heading: #39ff14;
+  --heading-soft: #ff5fa2;
+
+  --accent: #ffea00;
+  --accent-text: #0a0a0a;
+
+  --badge-bg: rgba(255, 255, 255, 0.1);
+  --badge-text: #00e5ff;
+
+  --nav-text: #ff6ec7;
+  --nav-hover: #39ff14;
+
+  --danger-bg: rgba(255, 0, 80, 0.18);
+  --danger-border: rgba(255, 0, 80, 0.4);
+  --danger-text: #ff4d6d;
+
+  --selection-bg: #ffea00;
+
+  --logo-from: #ff0080;
+  --logo-via: #39ff14;
+  --logo-to: #00e5ff;
+}
+
 ::selection {
   background: var(--selection-bg);
 }
 
 body {
+  font-weight: 500;
   transition:
     background-color 0.5s ease,
     color 0.5s ease;
+}
+
+/*
+  Monet "water" background: a few large, softly blurred blobs in the
+  theme's own palette, drifting slowly. Purely decorative (aria-hidden,
+  pointer-events: none from the component), only mounted for the monet
+  theme. Colors come from the same CSS vars as the rest of the theme so
+  there's one source of truth for the palette.
+*/
+.water-blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(50px);
+  opacity: 0.65;
+  mix-blend-mode: multiply;
+  will-change: transform;
+}
+
+.water-blob-a {
+  top: -12%;
+  left: -10%;
+  width: 42vw;
+  height: 42vw;
+  background-color: var(--logo-from);
+  animation: water-drift-a 13s ease-in-out infinite;
+}
+
+.water-blob-b {
+  top: 22%;
+  right: -12%;
+  width: 46vw;
+  height: 46vw;
+  background-color: var(--logo-to);
+  animation: water-drift-b 16s ease-in-out infinite;
+}
+
+.water-blob-c {
+  bottom: -16%;
+  left: 18%;
+  width: 38vw;
+  height: 38vw;
+  background-color: var(--logo-via);
+  animation: water-drift-c 11s ease-in-out infinite;
+}
+
+.water-blob-d {
+  bottom: 8%;
+  right: 14%;
+  width: 24vw;
+  height: 24vw;
+  /* Softer and dimmer than the other blobs -- the vivid heading violet
+     against the peach base read as a muddy, distracting patch. */
+  background-color: var(--nav-text);
+  opacity: 0.3;
+  animation: water-drift-a 19s ease-in-out infinite reverse;
+}
+
+@keyframes water-drift-a {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(6%, 4%) scale(1.08);
+  }
+}
+
+@keyframes water-drift-b {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-5%, 6%) scale(0.95);
+  }
+}
+
+@keyframes water-drift-c {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(4%, -5%) scale(1.05);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .water-blob {
+    animation: none !important;
+  }
 }

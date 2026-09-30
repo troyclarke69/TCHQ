@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 225">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#15803d"/>
+      <stop offset="0.55" stop-color="#166534"/>
+      <stop offset="1" stop-color="#991b1b"/>
+    </linearGradient>
+    <filter id="ds" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#0f172a" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <rect width="400" height="225" fill="url(#bg)"/>
+  <circle cx="350" cy="200" r="80" fill="#ffffff" opacity="0.07"/>
+  <circle cx="40" cy="20" r="70" fill="#0f172a" opacity="0.10"/>
+  <circle cx="70" cy="180" r="40" fill="#ffffff" opacity="0.06"/>
+
+  <g filter="url(#ds)">
+
+    <g stroke="#ffffff" stroke-opacity="0.85" stroke-width="6" stroke-linejoin="round"
+       fill="#0f172a" fill-opacity="0.18">
+      <rect x="150" y="60" width="66" height="94" rx="10" transform="rotate(-9 183 107)"/>
+      <rect x="184" y="65" width="66" height="94" rx="10" transform="rotate(9 217 112)"/>
+    </g>
+    <path d="M200.0 80.0 L207.6 101.5 L230.4 102.1 L212.4 116.0 L218.8 137.9 L200.0 125.0 L181.2 137.9 L187.6 116.0 L169.6 102.1 L192.4 101.5 Z" fill="#ffffff" fill-opacity="0.97"/>
+    
+  </g>
+</svg>

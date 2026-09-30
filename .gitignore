@@ -89,3 +89,14 @@ lerna-debug.log*
 # -------------------------
 *.swp
 *.swo
+
+# -------------------------
+# STRAY / LOCAL-ONLY FILES
+# (repo-root scratch copies used to generate/apply the thumbnail
+# updates -- the real, tracked scripts live in backend/scripts/)
+# -------------------------
+/sync_thumbnails.py
+/sync_thumbnails.sql
+/tchq-logos-final/
+/tchq-logos-final.zip
+frontend/public/README.txt

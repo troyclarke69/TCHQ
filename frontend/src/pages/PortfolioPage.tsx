@@ -5,8 +5,13 @@ import { apiGetJson, apiPostJson } from "../api";
 import type { ContactOut } from "../types";
 import { Input, Textarea } from "../components/FormFields";
 import ThemeSwitcher from "../components/ThemeSwitcher";
+import Typewriter from "../components/Typewriter";
+import WaterOverlay from "../components/WaterOverlay";
 import { initialsFrom, placeholderGradient } from "../lib/placeholder";
 import type { Project, Testimonial } from "../types";
+
+const HERO_HEADING = "I build fast, reliable apps — from idea to production.";
+const HERO_SUBTITLE = "Sharp UX, pragmatic architecture, and measurable outcomes.";
 
 type Api = {
   projects: Project[];
@@ -27,12 +32,30 @@ const staggerGrid = {
   },
 };
 
+type TechCount = { tech: string; count: number };
+
+// How many projects use each tech tag, most-used first (ties broken
+// alphabetically). Always computed off the full project list, independent
+// of whatever tech filter is currently applied to the grid.
+function techTally(projects: Project[]): TechCount[] {
+  const counts = new Map<string, number>();
+  for (const p of projects) {
+    for (const t of p.tech) {
+      counts.set(t, (counts.get(t) ?? 0) + 1);
+    }
+  }
+  return [...counts.entries()]
+    .map(([tech, count]) => ({ tech, count }))
+    .sort((a, b) => b.count - a.count || a.tech.localeCompare(b.tech));
+}
+
 export default function PortfolioPage() {
   const [data, setData] = useState<Api | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [contactError, setContactError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [techFilter, setTechFilter] = useState<string | null>(null);
 
   const baseUrl = import.meta.env.VITE_API_PROXY_TARGET || "";
   // console.log("API base URL:", baseUrl);
@@ -41,6 +64,24 @@ export default function PortfolioPage() {
     () => (data?.projects ?? []).filter((p) => p.featured),
     [data],
   );
+
+  const stack = useMemo(() => techTally(data?.projects ?? []), [data]);
+
+  const visibleProjects = useMemo(() => {
+    const list = data?.projects ?? [];
+    return techFilter ? list.filter((p) => p.tech.includes(techFilter)) : list;
+  }, [data, techFilter]);
+
+  // Selecting the same tag again clears the filter. `scroll` is used when
+  // the click came from the Tech stack section (below the grid), which is
+  // out of view when the filter is applied -- a click on a tag inside a
+  // card that's already visible doesn't need it.
+  function toggleTech(tech: string, opts?: { scroll?: boolean }) {
+    setTechFilter((cur) => (cur === tech ? null : tech));
+    if (opts?.scroll) {
+      document.getElementById("work")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -84,14 +125,34 @@ export default function PortfolioPage() {
   }
 
   return (
-    <div className="min-h-dvh bg-gradient-to-b from-[var(--bg-from)] via-[var(--bg-via)] to-[var(--bg-to)] text-[var(--text-primary)] transition-colors duration-500">
+    <div className="relative z-0 min-h-dvh overflow-hidden bg-gradient-to-b from-[var(--bg-from)] via-[var(--bg-via)] to-[var(--bg-to)] text-[var(--text-primary)] transition-colors duration-500">
+      <WaterOverlay />
       <div className="mx-auto max-w-5xl px-6 py-10">
         <Header />
 
         <main className="mt-10 space-y-16">
           <Hero />
 
-          <Section title="Featured work" subtitle="Selected projects">
+          <Section
+            title="Featured work"
+            subtitle={
+              techFilter ? (
+                <span className="inline-flex items-center gap-1.5">
+                  Filtered by{" "}
+                  <span className="font-medium text-[var(--text-primary)]">{techFilter}</span>
+                  <button
+                    type="button"
+                    onClick={() => setTechFilter(null)}
+                    className="ml-1 text-[var(--text-primary)] underline decoration-[var(--border)] underline-offset-4 transition hover:decoration-[var(--text-primary)]"
+                  >
+                    Clear
+                  </button>
+                </span>
+              ) : (
+                "Selected projects"
+              )
+            }
+          >
             <AnimatePresence mode="wait">
               {loadError ? (
                 <motion.div key="error" {...fadeIn()}>
@@ -101,23 +162,33 @@ export default function PortfolioPage() {
                 <motion.div key="skeleton" {...fadeIn()}>
                   <SkeletonGrid />
                 </motion.div>
+              ) : visibleProjects.length === 0 ? (
+                <motion.div key="empty-filter" {...fadeIn()}>
+                  <Muted>No projects use {techFilter}.</Muted>
+                </motion.div>
               ) : (
                 <motion.div
-                  key="projects"
+                  key={`projects-${techFilter ?? "all"}`}
                   className="grid gap-4 md:grid-cols-2"
                   variants={staggerGrid}
                   initial="hidden"
                   animate="show"
                 >
                   {/* {(featured.length ? featured : data.projects).map((p) => ( */}
-                  {data.projects.map((p) => (
-                    <ProjectCard key={p.id} p={p} />
+                  {visibleProjects.map((p) => (
+                    <ProjectCard key={p.id} p={p} techFilter={techFilter} onTechClick={toggleTech} />
                   ))}
                 </motion.div>
               )}
             </AnimatePresence>
           </Section>
 
+          <TechStackSection stack={stack} techFilter={techFilter} onTechClick={toggleTech} />
+
+          {/* Bio section hidden for now (originally meant as "testimonials" --
+              may revisit later). Left in place, not deleted, so it's a
+              one-line uncomment to bring back along with the nav link in
+              Header() below.
           <Section title="Bio" subtitle="Achievements, background, and skills">
             <AnimatePresence mode="wait">
               {!data ? (
@@ -143,6 +214,7 @@ export default function PortfolioPage() {
               )}
             </AnimatePresence>
           </Section>
+          */}
 
           <Section title="Contact" subtitle="Tell me about your project">
             <div className="grid gap-6 md:grid-cols-5">
@@ -262,11 +334,21 @@ function Header() {
           <a className="transition-colors hover:text-[var(--nav-hover)]" href="#work">
             Work
           </a>
+          {/* Bio nav link hidden along with the Bio section above.
           <a className="transition-colors hover:text-[var(--nav-hover)]" href="#testimonials">
             Bio
           </a>
+          */}
           <a className="transition-colors hover:text-[var(--nav-hover)]" href="#contact">
             Contact
+          </a>
+          <a
+            className="flex items-center gap-1.5 transition-colors hover:text-[var(--nav-hover)]"
+            href="/Troy_Clarke_Resume.pdf"
+            download
+          >
+            <DownloadIcon />
+            Résumé
           </a>
         </nav>
         <ThemeSwitcher />
@@ -276,6 +358,9 @@ function Header() {
 }
 
 function Hero() {
+  const [headingDone, setHeadingDone] = useState(false);
+  const [subtitleDone, setSubtitleDone] = useState(false);
+
   return (
     <motion.section
       initial={{ opacity: 0, y: 14 }}
@@ -285,13 +370,25 @@ function Hero() {
     >
       <div className="max-w-2xl">
         <h1 className="text-balance text-3xl font-semibold leading-tight text-[var(--heading)] md:text-4xl">
-          I build fast, reliable apps — from idea to production.
+          <Typewriter text={HERO_HEADING} speed={115} startDelay={250} onDone={() => setHeadingDone(true)} />
         </h1>
-        <p className="mt-4 text-pretty text-[var(--heading-soft)]">
-          Sharp UX, pragmatic architecture, and measurable outcomes.
+        <p className="mt-4 min-h-[1.5em] text-pretty text-[var(--heading-soft)]">
+          {headingDone ? (
+            <Typewriter
+              text={HERO_SUBTITLE}
+              speed={110}
+              startDelay={350}
+              onDone={() => setSubtitleDone(true)}
+            />
+          ) : null}
         </p>
 
-        <div className="mt-6 flex flex-wrap gap-3">
+        <motion.div
+          className="mt-6 flex flex-wrap gap-3"
+          initial={{ opacity: 0, y: 8 }}
+          animate={subtitleDone ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }}
+          transition={{ duration: 0.7, ease: EASE }}
+        >
           <motion.a
             href="#contact"
             whileHover={{ scale: 1.03 }}
@@ -308,7 +405,7 @@ function Hero() {
           >
             See my work
           </motion.a>
-        </div>
+        </motion.div>
       </div>
     </motion.section>
   );
@@ -316,7 +413,7 @@ function Hero() {
 
 function Section(props: {
   title: string;
-  subtitle?: string;
+  subtitle?: React.ReactNode;
   children: React.ReactNode;
 }) {
   const id = props.title.toLowerCase().includes("work")
@@ -350,13 +447,23 @@ function Section(props: {
 }
 
 function ProjectThumbnail({ p }: { p: Project }) {
-  if (p.thumbnail) {
+  const [broken, setBroken] = useState(false);
+
+  // If a project's thumbnail URL changes (e.g. edited in Admin), give the
+  // new one a fresh chance to load instead of staying stuck on the old
+  // failure.
+  useEffect(() => {
+    setBroken(false);
+  }, [p.thumbnail]);
+
+  if (p.thumbnail && !broken) {
     return (
       <div className="mb-4 aspect-[16/9] w-full overflow-hidden rounded-xl border border-[var(--border)]">
         <img
           src={p.thumbnail}
           alt={`${p.title} thumbnail`}
           loading="lazy"
+          onError={() => setBroken(true)}
           className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
         />
       </div>
@@ -382,7 +489,33 @@ function GithubIcon() {
   );
 }
 
-function ProjectCard({ p }: { p: Project }) {
+function DownloadIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-3.5 w-3.5"
+    >
+      <path d="M12 3v12" />
+      <path d="M7 10l5 5 5-5" />
+      <path d="M4 19h16" />
+    </svg>
+  );
+}
+
+function ProjectCard({
+  p,
+  techFilter,
+  onTechClick,
+}: {
+  p: Project;
+  techFilter: string | null;
+  onTechClick: (tech: string) => void;
+}) {
   return (
     <motion.div
       variants={fadeUp}
@@ -429,16 +562,69 @@ function ProjectCard({ p }: { p: Project }) {
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2">
-        {p.tech.slice(0, 6).map((t) => (
-          <span
-            key={t}
-            className="rounded-full border border-[var(--border)] bg-[var(--badge-bg)] px-2.5 py-1 text-xs text-[var(--badge-text)]"
-          >
-            {t}
-          </span>
-        ))}
+        {p.tech.slice(0, 6).map((t) => {
+          const active = techFilter === t;
+          return (
+            <button
+              key={t}
+              type="button"
+              onClick={() => onTechClick(t)}
+              aria-pressed={active}
+              className={`rounded-full border px-2.5 py-1 text-xs transition ${
+                active
+                  ? "border-[var(--accent)] bg-[var(--accent)] text-[var(--accent-text)]"
+                  : "border-[var(--border)] bg-[var(--badge-bg)] text-[var(--badge-text)] hover:border-[var(--accent)] hover:text-[var(--accent)]"
+              }`}
+            >
+              {t}
+            </button>
+          );
+        })}
       </div>
     </motion.div>
+  );
+}
+
+function TechStackSection({
+  stack,
+  techFilter,
+  onTechClick,
+}: {
+  stack: TechCount[];
+  techFilter: string | null;
+  onTechClick: (tech: string, opts?: { scroll?: boolean }) => void;
+}) {
+  if (stack.length === 0) return null;
+
+  return (
+    <Section title="Tech stack" subtitle={`${stack.length} tools across all projects`}>
+      <p className="-mt-2 mb-4 max-w-2xl text-sm text-[var(--text-muted)]">
+        Taken from each project's tech tags, with how many projects use each. Select one to
+        filter the projects above.
+      </p>
+      <div className="flex flex-wrap gap-2">
+        {stack.map(({ tech, count }) => {
+          const active = techFilter === tech;
+          return (
+            <button
+              key={tech}
+              type="button"
+              onClick={() => onTechClick(tech, { scroll: true })}
+              aria-pressed={active}
+              aria-label={`${tech}, used in ${count} project${count > 1 ? "s" : ""}`}
+              className={`inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 font-mono text-xs transition ${
+                active
+                  ? "border-[var(--accent)] bg-[var(--accent)] text-[var(--accent-text)]"
+                  : "border-[var(--border)] bg-[var(--surface)] text-[var(--text-primary)] hover:border-[var(--accent)] hover:text-[var(--accent)]"
+              }`}
+            >
+              {tech}
+              <span className={active ? "opacity-80" : "text-[var(--text-muted)]"}>{count}</span>
+            </button>
+          );
+        })}
+      </div>
+    </Section>
   );
 }
 

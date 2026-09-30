@@ -81,8 +81,16 @@ def require_admin(authorization: str | None = Header(default=None)) -> None:
 
 
 @app.get("/api/health")
-async def health() -> dict:
-    return {"ok": True}
+async def health(session: AsyncSession = Depends(get_session)) -> dict:
+    # A trivial query, not just a bare 200, so a single ping against this
+    # endpoint also wakes/keeps warm the Neon compute behind it -- not just
+    # the Fly machine. Never let a DB hiccup make health checks flap.
+    db_ok = True
+    try:
+        await session.execute(select(1))
+    except Exception:
+        db_ok = False
+    return {"ok": True, "db": db_ok}
 
 
 @app.get("/api/projects", response_model=list[schemas.ProjectOut])
@@ -143,6 +151,32 @@ async def admin_create_project(
 ) -> schemas.ProjectOut:
     p = models.Project(**payload.model_dump())
     session.add(p)
+    await session.commit()
+    await session.refresh(p)
+    return schemas.ProjectOut(
+        id=p.id,
+        title=p.title,
+        summary=p.summary,
+        tech=p.tech,
+        href=p.href,
+        github=p.github,
+        category=p.category,
+        thumbnail=p.thumbnail,
+        featured=p.featured,
+    )
+
+
+@app.put("/api/admin/projects/{project_id}", dependencies=[Depends(require_admin)], response_model=schemas.ProjectOut)
+async def admin_update_project(
+    project_id: uuid.UUID,
+    payload: schemas.ProjectIn,
+    session: AsyncSession = Depends(get_session),
+) -> schemas.ProjectOut:
+    p = await session.get(models.Project, project_id)
+    if p is None:
+        raise HTTPException(status_code=404, detail="Project not found")
+    for field, value in payload.model_dump().items():
+        setattr(p, field, value)
     await session.commit()
     await session.refresh(p)
     return schemas.ProjectOut(

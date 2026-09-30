@@ -1,8 +1,8 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
-export type Theme = "dark" | "light" | "monet";
+export type Theme = "dark" | "light" | "monet" | "funky";
 
-const THEMES: Theme[] = ["dark", "light", "monet"];
+const THEMES: Theme[] = ["dark", "light", "monet", "funky"];
 const STORAGE_KEY = "tchq-theme";
 
 type ThemeContextValue = {
@@ -17,14 +17,14 @@ function readInitialTheme(): Theme {
   if (typeof window === "undefined") return "dark";
   try {
     const stored = window.localStorage.getItem(STORAGE_KEY);
-    if (stored === "dark" || stored === "light" || stored === "monet") return stored;
+    if (stored === "dark" || stored === "light" || stored === "monet" || stored === "funky") return stored;
   } catch {
     /* ignore */
   }
   // Fall back to the attribute the inline bootstrap script in index.html
   // already set on <html>, so we don't flash a second theme on mount.
   const attr = document.documentElement.getAttribute("data-theme");
-  if (attr === "dark" || attr === "light" || attr === "monet") return attr;
+  if (attr === "dark" || attr === "light" || attr === "monet" || attr === "funky") return attr;
   return "dark";
 }
 

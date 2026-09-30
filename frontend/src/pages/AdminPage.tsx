@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { apiDelete, apiGetJson, apiPostJson } from "../api";
+import { apiDelete, apiGetJson, apiPostJson, apiPutJson } from "../api";
 import { clearAdminToken, getAdminToken, setAdminToken } from "../auth";
 import { Checkbox, Input, Textarea } from "../components/FormFields";
 import ThemeSwitcher from "../components/ThemeSwitcher";
@@ -22,6 +22,8 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loginLoading, setLoginLoading] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const baseUrl = import.meta.env.VITE_API_PROXY_TARGET || "";
   // console.log("API base URL:", baseUrl);
@@ -30,6 +32,11 @@ export default function AdminPage() {
     const fromData = projects.map((p) => p.category).filter((c): c is string => Boolean(c));
     return Array.from(new Set([...CATEGORY_SUGGESTIONS, ...fromData]));
   }, [projects]);
+
+  const editingProject = useMemo(
+    () => projects.find((p) => p.id === editingId) ?? null,
+    [projects, editingId],
+  );
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -90,7 +97,18 @@ export default function AdminPage() {
     setError(null);
   }
 
-  async function onCreateProject(e: React.FormEvent<HTMLFormElement>) {
+  function startEditProject(p: Project) {
+    setEditingId(p.id);
+    setError(null);
+    document.getElementById("project-form")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function cancelEditProject() {
+    setEditingId(null);
+    setError(null);
+  }
+
+  async function onSubmitProject(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!token) return;
     setError(null);
@@ -99,27 +117,38 @@ export default function AdminPage() {
     const githubRaw = String(form.get("github") ?? "").trim();
     const categoryRaw = String(form.get("category") ?? "").trim();
     const thumbnailRaw = String(form.get("thumbnail") ?? "").trim();
+    const payload = {
+      title: String(form.get("title") ?? ""),
+      summary: String(form.get("summary") ?? ""),
+      tech: parseTech(String(form.get("tech") ?? "")),
+      href: hrefRaw || null,
+      github: githubRaw || null,
+      category: categoryRaw || null,
+      thumbnail: thumbnailRaw || null,
+      featured: form.get("featured") === "on",
+    };
+
+    setSaving(true);
     try {
-      const created = await apiPostJson<Project>(
-        `${baseUrl}/api/admin/projects`,
-        {
-          title: String(form.get("title") ?? ""),
-          summary: String(form.get("summary") ?? ""),
-          tech: parseTech(String(form.get("tech") ?? "")),
-          href: hrefRaw || null,
-          github: githubRaw || null,
-          category: categoryRaw || null,
-          thumbnail: thumbnailRaw || null,
-          featured: form.get("featured") === "on",
-        },
-        token,
-      );
-      setProjects((prev) => [created, ...prev]);
-      // e.currentTarget.reset();
+      if (editingId) {
+        const updated = await apiPutJson<Project>(
+          `${baseUrl}/api/admin/projects/${editingId}`,
+          payload,
+          token,
+        );
+        setProjects((prev) => prev.map((p) => (p.id === editingId ? updated : p)));
+        setEditingId(null);
+      } else {
+        const created = await apiPostJson<Project>(`${baseUrl}/api/admin/projects`, payload, token);
+        setProjects((prev) => [created, ...prev]);
+        e.currentTarget.reset();
+      }
     } catch (err) {
       if (!handleUnauthorized(err)) {
-        setError(err instanceof Error ? err.message : "Failed to create project");
+        setError(err instanceof Error ? err.message : "Failed to save project");
       }
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -129,6 +158,7 @@ export default function AdminPage() {
     try {
       await apiDelete(`${baseUrl}/api/admin/projects/${id}`, token);
       setProjects((prev) => prev.filter((p) => p.id !== id));
+      if (editingId === id) setEditingId(null);
     } catch (err) {
       if (!handleUnauthorized(err)) {
         setError(err instanceof Error ? err.message : "Failed to delete project");
@@ -247,22 +277,61 @@ export default function AdminPage() {
 
             <section>
               <h2 className="text-lg font-semibold">Projects</h2>
-              <p className="mt-1 text-sm text-[var(--text-muted)]">Add or remove portfolio projects.</p>
+              <p className="mt-1 text-sm text-[var(--text-muted)]">
+                Add, edit, or remove portfolio projects.
+              </p>
 
               <form
-                className="mt-5 grid gap-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 md:grid-cols-2"
-                onSubmit={onCreateProject}
+                id="project-form"
+                key={editingId ?? "new"}
+                className="mt-5 grid scroll-mt-6 gap-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 md:grid-cols-2"
+                onSubmit={onSubmitProject}
               >
-                <Input label="Title" name="title" required minLength={2} maxLength={120} />
-                <Input label="Link (optional)" name="href" type="url" placeholder="https://…" />
+                {editingId ? (
+                  <div className="md:col-span-2 flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--badge-bg)] px-3 py-2 text-xs text-[var(--badge-text)]">
+                    <span>
+                      Editing <span className="font-medium">{editingProject?.title}</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={cancelEditProject}
+                      className="text-[var(--text-primary)] underline decoration-[var(--border)] underline-offset-4 hover:decoration-[var(--text-primary)]"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : null}
+                <Input
+                  label="Title"
+                  name="title"
+                  required
+                  minLength={2}
+                  maxLength={120}
+                  defaultValue={editingProject?.title ?? ""}
+                />
+                <Input
+                  label="Link (optional)"
+                  name="href"
+                  type="url"
+                  placeholder="https://…"
+                  defaultValue={editingProject?.href ?? ""}
+                />
                 <div className="md:col-span-2">
-                  <Input label="Summary" name="summary" required minLength={5} maxLength={280} />
+                  <Input
+                    label="Summary"
+                    name="summary"
+                    required
+                    minLength={5}
+                    maxLength={280}
+                    defaultValue={editingProject?.summary ?? ""}
+                  />
                 </div>
                 <div className="md:col-span-2">
                   <Input
                     label="Tech (comma-separated)"
                     name="tech"
                     placeholder="React, TypeScript, FastAPI"
+                    defaultValue={editingProject?.tech.join(", ") ?? ""}
                   />
                 </div>
                 <Input
@@ -271,6 +340,7 @@ export default function AdminPage() {
                   list="category-suggestions"
                   placeholder="Full stack"
                   maxLength={60}
+                  defaultValue={editingProject?.category ?? ""}
                 />
                 <datalist id="category-suggestions">
                   {categorySuggestions.map((c) => (
@@ -282,20 +352,36 @@ export default function AdminPage() {
                   name="github"
                   type="url"
                   placeholder="https://github.com/…"
+                  defaultValue={editingProject?.github ?? ""}
                 />
                 <Input
                   label="Thumbnail URL (optional)"
                   name="thumbnail"
                   type="url"
                   placeholder="https://…/image.png"
+                  defaultValue={editingProject?.thumbnail ?? ""}
                 />
-                <Checkbox label="Featured on homepage" name="featured" />
-                <div className="flex items-end md:justify-end">
+                <Checkbox
+                  label="Featured on homepage"
+                  name="featured"
+                  defaultChecked={editingProject?.featured ?? false}
+                />
+                <div className="flex items-end gap-3 md:justify-end">
+                  {editingId ? (
+                    <button
+                      type="button"
+                      onClick={cancelEditProject}
+                      className="inline-flex items-center justify-center rounded-xl border border-[var(--border)] px-4 py-2 text-sm font-medium text-[var(--text-primary)] transition hover:bg-[var(--surface-strong)]"
+                    >
+                      Cancel
+                    </button>
+                  ) : null}
                   <button
                     type="submit"
-                    className="inline-flex items-center justify-center rounded-xl bg-[var(--accent)] px-4 py-2 text-sm font-medium text-[var(--accent-text)] transition"
+                    disabled={saving}
+                    className="inline-flex items-center justify-center rounded-xl bg-[var(--accent)] px-4 py-2 text-sm font-medium text-[var(--accent-text)] transition disabled:opacity-60"
                   >
-                    Add project
+                    {saving ? "Saving…" : editingId ? "Save changes" : "Add project"}
                   </button>
                 </div>
               </form>
@@ -307,7 +393,11 @@ export default function AdminPage() {
                   projects.map((p) => (
                     <li
                       key={p.id}
-                      className="flex items-start justify-between gap-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4"
+                      className={`flex items-start justify-between gap-4 rounded-2xl border p-4 transition-colors ${
+                        p.id === editingId
+                          ? "border-[var(--accent)] bg-[var(--surface-strong)]"
+                          : "border-[var(--border)] bg-[var(--surface)]"
+                      }`}
                     >
                       <div>
                         <div className="font-medium">
@@ -320,6 +410,11 @@ export default function AdminPage() {
                           {p.featured ? (
                             <span className="ml-2 rounded-full border border-[var(--border)] px-2 py-0.5 text-xs text-[var(--text-muted)]">
                               featured
+                            </span>
+                          ) : null}
+                          {p.thumbnail ? (
+                            <span className="ml-2 rounded-full border border-[var(--border)] px-2 py-0.5 text-xs text-[var(--text-muted)]">
+                              thumbnail
                             </span>
                           ) : null}
                         </div>
@@ -340,13 +435,22 @@ export default function AdminPage() {
                           </div>
                         ) : null}
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => void onDeleteProject(p.id)}
-                        className="shrink-0 rounded-xl border border-[var(--danger-border)] px-3 py-1 text-xs text-[var(--danger-text)] transition hover:bg-[var(--danger-bg)]"
-                      >
-                        Delete
-                      </button>
+                      <div className="flex shrink-0 items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => startEditProject(p)}
+                          className="rounded-xl border border-[var(--border)] px-3 py-1 text-xs text-[var(--text-primary)] transition hover:bg-[var(--surface-strong)]"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void onDeleteProject(p.id)}
+                          className="rounded-xl border border-[var(--danger-border)] px-3 py-1 text-xs text-[var(--danger-text)] transition hover:bg-[var(--danger-bg)]"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </li>
                   ))
                 )}

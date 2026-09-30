@@ -5,10 +5,9 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["Roboto", "ui-sans-serif", "system-ui", "Segoe UI", "Arial"],
+        sans: ["Merriweather", "Georgia", "Cambria", "Times New Roman", "serif"],
       },
     },
   },
   plugins: [],
 } satisfies Config;
-

@@ -40,6 +40,22 @@ export async function apiPostJson<T>(
   return (await res.json()) as T;
 }
 
+export async function apiPutJson<T>(
+  path: string,
+  body: unknown,
+  token?: string | null,
+): Promise<T> {
+  const headers: Record<string, string> = {
+    Accept: "application/json",
+    "Content-Type": "application/json",
+  };
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  const res = await fetch(path, { method: "PUT", headers, body: JSON.stringify(body) });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as T;
+}
+
 export async function apiDelete(path: string, token: string): Promise<void> {
   const res = await fetch(path, {
     method: "DELETE",

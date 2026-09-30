@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 225">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1e3a8a"/>
+      <stop offset="0.55" stop-color="#1e40af"/>
+      <stop offset="1" stop-color="#0891b2"/>
+    </linearGradient>
+    <filter id="ds" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#0f172a" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <rect width="400" height="225" fill="url(#bg)"/>
+  <circle cx="30" cy="190" r="75" fill="#ffffff" opacity="0.06"/>
+  <circle cx="370" cy="15" r="85" fill="#0f172a" opacity="0.12"/>
+  <circle cx="350" cy="170" r="45" fill="#ffffff" opacity="0.06"/>
+
+  <g filter="url(#ds)">
+    <!-- shield -->
+    <path d="M200 55 l52 20 v42 c0 40 -24 62 -52 74 c-28 -12 -52 -34 -52 -74 v-42 z"
+          fill="none" stroke="#ffffff" stroke-opacity="0.94" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"/>
+
+    <!-- key, laid diagonally directly over the shield -->
+    <g transform="rotate(35 200 116)" fill="none" stroke="#ffffff" stroke-opacity="0.97" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="175" cy="116" r="16"/>
+      <line x1="191" y1="116" x2="235" y2="116"/>
+      <line x1="215" y1="116" x2="215" y2="129"/>
+      <line x1="226" y1="116" x2="226" y2="125"/>
+    </g>
+  </g>
+</svg>
