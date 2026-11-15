@@ -1,30 +1,43 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#0F6CBD"/>
-      <stop offset="1" stop-color="#0A4A82"/>
+      <stop offset="0" stop-color="#2563eb"/>
+      <stop offset="0.55" stop-color="#1d4ed8"/>
+      <stop offset="1" stop-color="#0e7490"/>
     </linearGradient>
+    <filter id="ds" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#0f172a" flood-opacity="0.35"/>
+    </filter>
   </defs>
-  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
-  <!-- flow line -->
-  <path d="M 96 256 L 416 256" stroke="white" stroke-width="10" stroke-linecap="round" opacity="0.35" fill="none"/>
-  <path d="M 96 256 L 200 256" stroke="white" stroke-width="10" stroke-linecap="round" fill="none"/>
-  <!-- Node 1: Blazor / UI -->
-  <rect x="56" y="196" width="120" height="120" rx="24" fill="white"/>
-  <text x="116" y="268" font-family="Arial, Helvetica, sans-serif" font-size="52" font-weight="800" fill="#0F6CBD" text-anchor="middle">UI</text>
-  <!-- Node 2: Kafka - bars -->
-  <circle cx="256" cy="256" r="62" fill="white"/>
-  <g fill="#0F6CBD">
-    <rect x="232" y="228" width="10" height="56" rx="3"/>
-    <rect x="251" y="218" width="10" height="76" rx="3"/>
-    <rect x="270" y="232" width="10" height="48" rx="3"/>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <circle cx="80" cy="430" r="90" fill="#ffffff" opacity="0.07"/>
+  <circle cx="460" cy="70" r="120" fill="#0f172a" opacity="0.10"/>
+  <circle cx="420" cy="410" r="70" fill="#ffffff" opacity="0.06"/>
+  <g transform="translate(256 256) scale(0.72) translate(-256 -256)" filter="url(#ds)">
+    <!-- connectors -->
+    <line x1="196" y1="256" x2="316" y2="256" stroke="#ffffff" stroke-opacity="0.7" stroke-width="6"/>
+    <!-- three tiles - centred row, safe padding, no labels -->
+    <g fill="#ffffff" opacity="0.97">
+      <rect x="76" y="196" width="120" height="120" rx="22"/>
+      <rect x="196" y="196" width="120" height="120" rx="22"/>
+      <rect x="316" y="196" width="120" height="120" rx="22"/>
+    </g>
+    <!-- Blazor / UI - window mark, no letters -->
+    <g fill="#1d4ed8">
+      <rect x="106" y="226" width="24" height="24" rx="5"/>
+      <rect x="140" y="226" width="24" height="24" rx="5"/>
+      <rect x="106" y="260" width="24" height="24" rx="5"/>
+      <rect x="140" y="260" width="24" height="24" rx="5"/>
+    </g>
+    <!-- Kafka - three bars -->
+    <g fill="#1d4ed8">
+      <rect x="234" y="230" width="12" height="52" rx="4"/>
+      <rect x="250" y="218" width="12" height="76" rx="4"/>
+      <rect x="266" y="230" width="12" height="52" rx="4"/>
+    </g>
+    <!-- Airflow - three swirl -->
+    <path d="M376 226 C390 226 394 240 384 248 C374 256 360 250 362 240" fill="none" stroke="#1d4ed8" stroke-width="9" stroke-linecap="round"/>
+    <path d="M376 286 C362 286 358 272 368 264 C378 256 392 262 390 272" fill="none" stroke="#1d4ed8" stroke-width="9" stroke-linecap="round"/>
+    <circle cx="376" cy="256" r="6" fill="#1d4ed8"/>
   </g>
-  <!-- Node 3: Airflow - wind -->
-  <rect x="336" y="196" width="120" height="120" rx="24" fill="white"/>
-  <path d="M 360 238 Q 396 228 396 244 Q 396 258 380 258 L 360 258 M 360 268 Q 404 258 404 274 Q 404 288 384 288 L 360 288" stroke="#0F6CBD" stroke-width="8" stroke-linecap="round" fill="none"/>
-  <!-- labels -->
-  <text x="116" y="352" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="white" text-anchor="middle">BLAZOR</text>
-  <text x="256" y="352" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="white" text-anchor="middle">KAFKA</text>
-  <text x="396" y="352" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="white" text-anchor="middle">AIRFLOW</text>
-  <text x="256" y="412" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="800" fill="white" text-anchor="middle" letter-spacing="3">DEMO LABS</text>
 </svg>
