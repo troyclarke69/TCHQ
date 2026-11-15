@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0F6CBD"/>
+      <stop offset="1" stop-color="#0A4A82"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+  <!-- flow line -->
+  <path d="M 96 256 L 416 256" stroke="white" stroke-width="10" stroke-linecap="round" opacity="0.35" fill="none"/>
+  <path d="M 96 256 L 200 256" stroke="white" stroke-width="10" stroke-linecap="round" fill="none"/>
+  <!-- Node 1: Blazor / UI -->
+  <rect x="56" y="196" width="120" height="120" rx="24" fill="white"/>
+  <text x="116" y="268" font-family="Arial, Helvetica, sans-serif" font-size="52" font-weight="800" fill="#0F6CBD" text-anchor="middle">UI</text>
+  <!-- Node 2: Kafka - bars -->
+  <circle cx="256" cy="256" r="62" fill="white"/>
+  <g fill="#0F6CBD">
+    <rect x="232" y="228" width="10" height="56" rx="3"/>
+    <rect x="251" y="218" width="10" height="76" rx="3"/>
+    <rect x="270" y="232" width="10" height="48" rx="3"/>
+  </g>
+  <!-- Node 3: Airflow - wind -->
+  <rect x="336" y="196" width="120" height="120" rx="24" fill="white"/>
+  <path d="M 360 238 Q 396 228 396 244 Q 396 258 380 258 L 360 258 M 360 268 Q 404 258 404 274 Q 404 288 384 288 L 360 288" stroke="#0F6CBD" stroke-width="8" stroke-linecap="round" fill="none"/>
+  <!-- labels -->
+  <text x="116" y="352" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="white" text-anchor="middle">BLAZOR</text>
+  <text x="256" y="352" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="white" text-anchor="middle">KAFKA</text>
+  <text x="396" y="352" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="white" text-anchor="middle">AIRFLOW</text>
+  <text x="256" y="412" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="800" fill="white" text-anchor="middle" letter-spacing="3">DEMO LABS</text>
+</svg>
